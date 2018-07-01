@@ -1,6 +1,6 @@
 #!/bin/bash
 date=`date +%Y%m%d%H%M`
-
+#Put all DBA e-mail in file DBAMAIL
 DBA=`cat /mysql/scripts/DBAMAIL`
 LOG_FILE=/mysql/backup/db_name/bkuplog/db_namebkupmail_$date.log
 ERR_FILE=/mysql/backup/db_name/bkuplog/db_namebkup_$date.err
@@ -16,7 +16,7 @@ xtrabackup --defaults-file=/etc/my.cnf --defaults-group=db_name --backup \
 if [ $? -eq 0 ]
 then
 echo "$date2:db_name Full Backup successful" > $LOG_FILE
-echo "========================================================================================" >> $LOG_FILE
+echo "========================================" >> $LOG_FILE
        echo "" >> $LOG_FILE
        echo "Thanks," >> $LOG_FILE
        echo "MySQL DBA " >> $LOG_FILE
@@ -25,7 +25,7 @@ echo "==========================================================================
 else
 echo "db_name  Full Backup failed, Below is the error:" > $LOG_FILE
 tail $ERR_FILE | grep ERROR >> $LOG_FILE
-echo "========================================================================================" >> $LOG_FILE
+echo "=========================================" >> $LOG_FILE
        echo "" >> $LOG_FILE
        echo "Thanks," >> $LOG_FILE
        echo "MySQL DBA" >> $LOG_FILE
@@ -39,23 +39,24 @@ xtrabackup --defaults-file=/etc/my.cnf --port 0000 --server-id=0000 --socket=/my
 if [ $? -eq 0 ]
 then
 echo "$date2:db_name Full Backup Prepare successful" > $LOG_FILE1
-echo "========================================================================================" >> $LOG_FILE1
+echo "==============================================" >> $LOG_FILE1
        echo "" >> $LOG_FILE1
        echo "Thanks," >> $LOG_FILE1
-       echo "MySQL DBA Team" >> $LOG_FILE1
+       echo "MySQL DBA " >> $LOG_FILE1
        echo "This is an automated generated mail" >> $LOG_FILE1
 #/bin/mail -s "db_name Full Backup Prepare successful on `hostname`" $DBA < $LOG_FILE1
 else
 echo "db_name  Full Backup Preapare failed, Below is the error:" > $LOG_FILE1
 tail $ERR_FILE1 | grep ERROR >> $LOG_FILE1
-echo "========================================================================================" >> $LOG_FILE1
+echo "============================================" >> $LOG_FILE1
        echo "" >> $LOG_FILE1
        echo "Thanks," >> $LOG_FILE1
-       echo "MySQL DBA Team" >> $LOG_FILE1
+       echo "MySQL DBA " >> $LOG_FILE1
        echo "This is an automated generated mail" >> $LOG_FILE1
 mail -s "db_name Full Backup Prepare failed  on `hostname` " $DBA < $LOG_FILE1
 fi
-
+# Tar bakcup file so that it will become file and you would be able to delete old files from
+# Backup directories 
 /bin/tar -zcvf /mysql/backup/db_name/db_namebkup_$date.tar.gz /mysql/backup/db_name/db_namebkup_$date
-
+# Delete the origional backup directory after tar, which was created by Xtrabackup
 rm -rf /mysql/backup/db_name/db_namebkup_$date
